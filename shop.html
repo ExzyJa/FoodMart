@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop | FoodMart</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/vendor.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="shop-page">
+  <header class="shop-header border-bottom bg-white">
+    <div class="container-fluid py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <a class="main-logo" href="index.html"><img src="images/logo.png" alt="FoodMart" class="img-fluid"></a>
+      <a class="btn btn-outline-dark" href="index.html">Back to home</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="shop-intro py-5">
+      <div class="container-fluid">
+        <p class="text-uppercase text-muted mb-2">Fresh groceries, simple checkout</p>
+        <h1 class="display-5 mb-2">Shop FoodMart</h1>
+        <p class="mb-0">Every product is currently priced at <strong>₱1.00</strong>.</p>
+      </div>
+    </section>
+
+    <section class="pb-5">
+      <div class="container-fluid">
+        <div class="row g-4">
+          <div class="col-lg-8">
+            <div class="row g-4" id="product-list"></div>
+          </div>
+          <aside class="col-lg-4">
+            <div class="shop-panel p-4 sticky-lg-top">
+              <h2 class="h4 mb-3">Your order</h2>
+              <div id="shop-cart" class="mb-4"></div>
+              <div class="d-flex justify-content-between border-top pt-3 mb-4">
+                <strong>Total</strong><strong id="shop-total">₱0.00</strong>
+              </div>
+              <form id="order-form" novalidate>
+                <h3 class="h5">Delivery details</h3>
+                <label class="form-label" for="customer-name">Name</label>
+                <input class="form-control mb-3" id="customer-name" required>
+                <label class="form-label" for="customer-phone">Mobile number</label>
+                <input class="form-control mb-3" id="customer-phone" type="tel" required>
+                <label class="form-label" for="customer-address">Delivery address</label>
+                <textarea class="form-control mb-3" id="customer-address" rows="3" required></textarea>
+                <fieldset class="mb-3">
+                  <legend class="h6">Payment method</legend>
+                  <label class="payment-option d-block mb-2"><input type="radio" name="payment" value="cash" checked> Cash on delivery</label>
+                  <label class="payment-option d-block"><input type="radio" name="payment" value="paymongo"> PayMongo</label>
+                </fieldset>
+                <button class="btn btn-primary btn-lg w-100" type="submit">Place order</button>
+                <p class="small text-muted mt-2 mb-0">PayMongo payments open in a secure hosted checkout when a checkout URL is configured.</p>
+              </form>
+              <div id="order-result" class="alert alert-success mt-4 d-none" role="status"></div>
+              <div id="order-qr-panel" class="order-qr-panel mt-4 d-none">
+                <h3 class="h6">Order QR code</h3>
+                <div id="order-qr" aria-label="QR code for your order"></div>
+                <p class="small text-muted mb-0">Show this code when confirming your order.</p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="js/shop.js"></script>
+</body>
+</html>

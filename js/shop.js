@@ -11,7 +11,6 @@
   ];
   var price = 1;
   var cart = JSON.parse(localStorage.getItem("foodmart-cart") || "[]");
-  var paymongoCheckoutUrl = "";
 
   var formatPrice = function(value) {
     return "₱" + value.toFixed(2);
@@ -108,13 +107,31 @@
     var orderNumber = "FM-" + Date.now().toString().slice(-6);
     var orderTotal = formatPrice(cart.reduce(function(sum, item) { return sum + item.quantity * price; }, 0));
     if (payment === "paymongo") {
-      if (paymongoCheckoutUrl) {
-        window.location.href = paymongoCheckoutUrl;
-        return;
-      }
+      var submitButton = form.querySelector("button[type=submit]");
+      submitButton.disabled = true;
       result.className = "alert alert-info mt-4";
-      result.textContent = "PayMongo is selected. This order is pending payment until a secure PayMongo Checkout URL is configured.";
-      showOrderQr(orderNumber, customerName, orderTotal, "PayMongo pending");
+      result.textContent = "Opening secure payment checkout...";
+      fetch("api/create-checkout.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          order_number: orderNumber,
+          customer_name: customerName,
+          customer_email: form.elements.email.value,
+          items: cart.map(function(item) { return { id: item.id, quantity: item.quantity }; })
+        })
+      }).then(function(response) {
+        return response.json().then(function(data) {
+          if (!response.ok) throw new Error(data.message || "Could not start payment.");
+          return data;
+        });
+      }).then(function(data) {
+        window.location.href = data.checkout_url;
+      }).catch(function(error) {
+        result.className = "alert alert-danger mt-4";
+        result.textContent = error.message;
+        submitButton.disabled = false;
+      });
       return;
     }
 

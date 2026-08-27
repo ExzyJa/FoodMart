@@ -301,6 +301,38 @@
     renderWishlist();
   };
 
+  var initSocialLinks = function() {
+    var socialLinks = document.querySelectorAll('.social-links li a');
+    var replacements = [
+      {
+        href: 'https://github.com/ExzyJa/FoodMart',
+        label: 'GitHub',
+        path: 'M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.69c-2.78.6-3.37-1.18-3.37-1.18a2.65 2.65 0 0 0-1.11-1.46c-.91-.62.07-.61.07-.61a2.1 2.1 0 0 1 1.53 1.03a2.12 2.12 0 0 0 2.9.83a2.1 2.1 0 0 1 .63-1.33c-2.22-.25-4.55-1.11-4.55-4.94a3.87 3.87 0 0 1 1.03-2.68a3.6 3.6 0 0 1 .1-2.64s.84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02a3.6 3.6 0 0 1 .1 2.64a3.87 3.87 0 0 1 1.03 2.68c0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z'
+      },
+      {
+        href: 'portfolio.html',
+        label: 'Portfolio',
+        path: 'M9 4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2h4a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3Zm2 0v1h2V4h-2Zm9 5H4v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9Zm-9 2h2v2h-2v-2Z'
+      },
+      {
+        href: 'https://www.tiktok.com/',
+        label: 'TikTok',
+        path: 'M16 3c.4 2.1 1.6 3.4 3.7 3.5v3.2a8.1 8.1 0 0 1-3.7-1.1v6.1a6.3 6.3 0 1 1-5.5-6.2v3.3a3.1 3.1 0 1 0 2.4 3V3H16Z'
+      }
+    ];
+    [1, 2, 4].forEach(function(index, replacementIndex) {
+      var link = socialLinks[index];
+      var replacement = replacements[replacementIndex];
+      if (!link || !replacement) return;
+      link.href = replacement.href;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.setAttribute('aria-label', replacement.label);
+      link.title = replacement.label;
+      link.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="' + replacement.path + '"></path></svg>';
+    });
+  };
+
   // init jarallax parallax
   var initJarallax = function() {
     jarallax(document.querySelectorAll(".jarallax"));
@@ -317,6 +349,7 @@
     initSwiper();
     initProductQty();
     initShopping();
+    initSocialLinks();
     initJarallax();
     initChocolat();
 

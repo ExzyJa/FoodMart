@@ -78,6 +78,7 @@
     if (!id) return;
 
     var item = cart.filter(function(entry) { return entry.id === id; })[0];
+    if (addButton && !window.FoodMartAuth.requireLoginForCart({ id: id, name: products.filter(function(entry) { return entry.id === id; })[0].name, quantity: 1 }, "shop.html")) return;
     if (addButton && item) item.quantity += 1;
     if (addButton && !item) {
       var product = products.filter(function(entry) { return entry.id === id; })[0];
@@ -126,6 +127,13 @@
     showOrderQr(orderNumber, customerName, orderTotal, "Cash on delivery");
   });
 
+  var pending = window.FoodMartAuth.takePendingCart();
+  if (pending && pending.returnUrl === "shop.html" && pending.item) {
+    var pendingItem = cart.filter(function(entry) { return entry.id === pending.item.id; })[0];
+    if (pendingItem) pendingItem.quantity += pending.item.quantity;
+    else cart.push(pending.item);
+    saveCart();
+  }
   renderProducts();
   renderCart();
 }());

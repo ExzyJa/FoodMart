@@ -128,14 +128,20 @@
   }
 
   var initShopping = function() {
-    var cart = [];
+    var cart = JSON.parse(localStorage.getItem('foodmart-home-cart') || '[]');
+    var wishlist = JSON.parse(localStorage.getItem('foodmart-wishlist') || '[]');
     var $cartItems = $('#cart-items');
     var $cartCount = $('#cart-count');
     var $cartTotal = $('#cart-total');
     var $headerCartTotal = $('.cart-total');
+    var $wishlistItems = $('#wishlist-items');
 
     var money = function(value) {
       return '$' + value.toFixed(2);
+    };
+
+    var saveCart = function() {
+      localStorage.setItem('foodmart-home-cart', JSON.stringify(cart));
     };
 
     var renderCart = function() {
@@ -159,11 +165,38 @@
       }).join(''));
     };
 
+    var renderWishlist = function() {
+      if (!$wishlistItems.length) return;
+      var favoriteProducts = $('.product-item').filter(function() {
+        return wishlist.indexOf(String($(this).data('product-id'))) !== -1;
+      });
+      $('#wishlist-count').text(favoriteProducts.length);
+      $('.nav-wishlist').attr('aria-label', 'Open favorites (' + favoriteProducts.length + ')');
+      if (!favoriteProducts.length) {
+        $wishlistItems.html('<li class="list-group-item text-muted">Your favorites are empty.</li>');
+        return;
+      }
+      $wishlistItems.html(favoriteProducts.map(function() {
+        var $product = $(this);
+        var productId = String($product.data('product-id'));
+        return '<li class="list-group-item d-flex justify-content-between align-items-center gap-2">' +
+          '<span>' + $product.find('h3').first().text().trim() + '</span>' +
+          '<button type="button" class="btn btn-sm btn-outline-danger remove-wishlist" data-id="' + productId + '" aria-label="Remove ' + $product.find('h3').first().text().trim() + ' from favorites">Remove</button>' +
+          '</li>';
+      }).get().join(''));
+    };
+
     $('.product-item').each(function(index) {
       var $product = $(this);
       if (!$product.find('h3').length || !$product.find('.price').length) return;
 
       $product.attr('data-product-id', index);
+      var productId = String(index);
+      var isWishlisted = wishlist.indexOf(productId) !== -1;
+      $product.find('.btn-wishlist')
+        .toggleClass('active', isWishlisted)
+        .attr('aria-pressed', isWishlisted ? 'true' : 'false')
+        .attr('aria-label', isWishlisted ? 'Remove ' + $product.find('h3').first().text().trim() + ' from favorites' : 'Add ' + $product.find('h3').first().text().trim() + ' to favorites');
       $product.find('a').filter(function() {
         return $(this).text().trim().indexOf('Add to Cart') === 0;
       }).addClass('add-to-cart');
@@ -174,30 +207,56 @@
       var $product = $(this).closest('.product-item');
       var id = $product.data('product-id');
       var quantity = Math.max(1, parseInt($product.find('.input-number').val(), 10) || 1);
+      var pendingItem = {
+        id: id,
+        name: $product.find('h3').first().text().trim(),
+        price: parseFloat($product.find('.price').first().text().replace(/[^0-9.]/g, '')) || 0,
+        quantity: quantity
+      };
+
+      if (!window.FoodMartAuth.requireLoginForCart(pendingItem, 'index.html')) return;
       var existing = cart.filter(function(item) { return item.id === id; })[0];
 
       if (existing) {
         existing.quantity += quantity;
       } else {
-        cart.push({
-          id: id,
-          name: $product.find('h3').first().text().trim(),
-          price: parseFloat($product.find('.price').first().text().replace(/[^0-9.]/g, '')) || 0,
-          quantity: quantity
-        });
+        cart.push(pendingItem);
       }
+      saveCart();
       renderCart();
     });
 
     $(document).on('click', '.remove-cart-item', function() {
       var id = $(this).data('id');
       cart = cart.filter(function(item) { return item.id !== id; });
+      saveCart();
       renderCart();
     });
 
-    $('.btn-wishlist').click(function(e) {
+    $(document).on('click', '.btn-wishlist', function(e) {
       e.preventDefault();
-      $(this).toggleClass('active').attr('aria-pressed', $(this).hasClass('active'));
+      var $button = $(this);
+      var productId = String($button.closest('.product-item').data('product-id'));
+      var productName = $button.closest('.product-item').find('h3').first().text().trim();
+      var isActive = !$button.hasClass('active');
+      wishlist = wishlist.filter(function(id) { return id !== productId; });
+      if (isActive) wishlist.push(productId);
+      localStorage.setItem('foodmart-wishlist', JSON.stringify(wishlist));
+      $button.toggleClass('active', isActive)
+        .attr('aria-pressed', isActive ? 'true' : 'false')
+        .attr('aria-label', isActive ? 'Remove ' + productName + ' from favorites' : 'Add ' + productName + ' to favorites');
+      renderWishlist();
+    });
+
+    $(document).on('click', '.remove-wishlist', function() {
+      var productId = String($(this).data('id'));
+      wishlist = wishlist.filter(function(id) { return id !== productId; });
+      localStorage.setItem('foodmart-wishlist', JSON.stringify(wishlist));
+      $('.product-item[data-product-id="' + productId + '"] .btn-wishlist')
+        .removeClass('active')
+        .attr('aria-pressed', 'false')
+        .attr('aria-label', 'Add this product to favorites');
+      renderWishlist();
     });
 
     var filterProducts = function(query) {
@@ -231,7 +290,15 @@
       alert(cart.length ? 'Checkout is ready to connect to a payment provider.' : 'Add an item to your cart first.');
     });
 
+    var pending = window.FoodMartAuth.takePendingCart();
+    if (pending && pending.returnUrl === 'index.html' && pending.item) {
+      var pendingExisting = cart.filter(function(item) { return item.id === pending.item.id; })[0];
+      if (pendingExisting) pendingExisting.quantity += pending.item.quantity;
+      else cart.push(pending.item);
+      saveCart();
+    }
     renderCart();
+    renderWishlist();
   };
 
   // init jarallax parallax

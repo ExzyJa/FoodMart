@@ -258,6 +258,61 @@ body {
 .shop-page {
   background: #fffaf0;
 }
+
+.auth-page {
+  min-height: 100vh;
+  background: #fffaf0;
+}
+
+.auth-header {
+  background: var(--light-color);
+}
+
+.auth-shell {
+  min-height: calc(100vh - 88px);
+  display: flex;
+  align-items: center;
+  padding: 4rem 0;
+  background: linear-gradient(135deg, #fffaf0 0%, #eef5e4 100%);
+}
+
+.auth-panel {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 3rem;
+  background: var(--light-color);
+  border: 1px solid #f0eadf;
+  border-radius: 8px;
+  box-shadow: 0 1rem 3rem rgba(34, 34, 34, 0.08);
+}
+
+.auth-panel .form-control {
+  min-height: 48px;
+  border-color: #e7e1d7;
+}
+
+.auth-panel .form-control:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.2rem rgba(255, 196, 63, 0.2);
+}
+
+.auth-badge {
+  color: #9a6a00;
+  background: #fff4d6;
+}
+
+.verification-code {
+  letter-spacing: 0.35em;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--dark-color);
+}
+
+@media screen and (max-width: 575px) {
+  .auth-panel {
+    padding: 2rem 1.25rem;
+  }
+}
 .shop-header {
   position: sticky;
   top: 0;
@@ -640,6 +695,11 @@ h1,h2,h3,h4,h5,h6 {
 }
 .product-item .btn-wishlist:hover {
   background: rgb(240, 56, 56);
+  color: #fff;
+}
+.product-item .btn-wishlist.active {
+  background: rgb(240, 56, 56);
+  border-color: rgb(240, 56, 56);
   color: #fff;
 }
 .product-item .qty {

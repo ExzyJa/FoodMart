@@ -32,6 +32,14 @@
     element.className = "alert alert-" + type;
   }
 
+  function sendVerificationEmail(user) {
+    var actionSettings = window.location.protocol === "http:" || window.location.protocol === "https:" ? {
+      url: window.location.origin + "/login.html",
+      handleCodeInApp: false
+    } : undefined;
+    return user.sendEmailVerification(actionSettings);
+  }
+
   var registerForm = document.getElementById("register-form");
   if (registerForm) {
     var registerMessage = document.getElementById("register-message");
@@ -57,13 +65,22 @@
       firebase.auth().createUserWithEmailAndPassword(email, password).then(function(result) {
         currentUser = result.user;
         return currentUser.updateProfile({ displayName: name }).then(function() {
-          return currentUser.sendEmailVerification();
+          return sendVerificationEmail(currentUser);
         });
       }).then(function() {
         registerForm.classList.add("d-none");
         verificationPanel.classList.remove("d-none");
       }).catch(function(error) {
         showMessage(registerMessage, error.code === "auth/email-already-in-use" ? "An account with this Gmail address already exists." : error.message, "danger");
+      });
+    });
+
+    document.getElementById("resend-verification").addEventListener("click", function() {
+      if (!currentUser) return;
+      sendVerificationEmail(currentUser).then(function() {
+        showMessage(verificationMessage, "A new verification email was sent. Check your inbox and spam folder.", "success");
+      }).catch(function(error) {
+        showMessage(verificationMessage, error.code === "auth/too-many-requests" ? "Please wait a few minutes before requesting another email." : error.message, "danger");
       });
     });
 
@@ -96,7 +113,9 @@
       } else {
         firebase.auth().signInWithEmailAndPassword(email, password).then(function(result) {
           if (!result.user.emailVerified) {
-            return firebase.auth().signOut().then(function() { throw new Error("Please verify your email before logging in."); });
+            return sendVerificationEmail(result.user).then(function() {
+              return firebase.auth().signOut().then(function() { throw new Error("Please verify your email. A new verification email was sent."); });
+            });
           }
           localStorage.setItem(sessionKey, "1");
           showMessage(message, "You are logged in. Redirecting...", "success");

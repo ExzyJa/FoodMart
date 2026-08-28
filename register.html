@@ -43,13 +43,14 @@
             <input class="form-control" id="register-confirm" type="password" autocomplete="new-password" required>
           </div>
           <div id="register-message" class="alert d-none" role="alert"></div>
-          <button class="btn btn-primary btn-lg w-100" type="submit">Send verification code</button>
+          <button class="btn btn-primary btn-lg w-100" type="submit">Send verification email</button>
         </form>
         <div id="verification-panel" class="d-none">
           <div class="alert alert-info" role="status">A verification link has been sent to your Gmail address. Open it, then return here.</div>
           <form id="verification-form" novalidate>
             <div id="verification-message" class="alert d-none" role="alert"></div>
             <button class="btn btn-primary btn-lg w-100" type="submit">I verified my email</button>
+            <button id="resend-verification" class="btn btn-link w-100 mt-2" type="button">Resend verification email</button>
           </form>
         </div>
         <p class="text-center text-muted mt-4 mb-0">Already registered? <a href="login.html">Log in</a></p>

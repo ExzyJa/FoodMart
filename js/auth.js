@@ -15,6 +15,11 @@
       window.location.href = "register.html";
       return false;
     },
+    requireLoginForWishlist: function() {
+      if (this.isLoggedIn()) return true;
+      window.location.href = "login.html";
+      return false;
+    },
     takePendingCart: function() {
       var pending = JSON.parse(localStorage.getItem(pendingCartKey) || "null");
       localStorage.removeItem(pendingCartKey);

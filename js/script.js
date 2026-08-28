@@ -235,6 +235,7 @@
 
     $(document).on('click', '.btn-wishlist', function(e) {
       e.preventDefault();
+      if (!window.FoodMartAuth.requireLoginForWishlist()) return;
       var $button = $(this);
       var productId = String($button.closest('.product-item').data('product-id'));
       var productName = $button.closest('.product-item').find('h3').first().text().trim();

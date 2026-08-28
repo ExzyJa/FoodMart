@@ -52,6 +52,15 @@
     }).join("");
   };
 
+  var filterProducts = function(query) {
+    var normalizedQuery = query.toLowerCase().trim();
+    var productElements = document.querySelectorAll("#product-list .shop-product");
+    productElements.forEach(function(productElement) {
+      var matches = !normalizedQuery || productElement.textContent.toLowerCase().indexOf(normalizedQuery) !== -1;
+      productElement.closest(".col-sm-6").classList.toggle("d-none", !matches);
+    });
+  };
+
   var renderCart = function() {
     var cartElement = document.getElementById("shop-cart");
     var totalElement = document.getElementById("shop-total");
@@ -152,5 +161,7 @@
     saveCart();
   }
   renderProducts();
+  var searchQuery = new URLSearchParams(window.location.search).get("search") || "";
+  filterProducts(searchQuery);
   renderCart();
 }());

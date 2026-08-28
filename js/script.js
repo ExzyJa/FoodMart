@@ -276,7 +276,12 @@
 
     $('#search-form, #offcanvasSearch form').submit(function(e) {
       e.preventDefault();
-      filterProducts($(this).find('input').val());
+      var query = $(this).find('input').val().trim();
+      if (query) {
+        window.location.href = 'shop.html?search=' + encodeURIComponent(query);
+        return;
+      }
+      filterProducts(query);
       bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('offcanvasSearch')).hide();
       document.querySelector('.product-tabs').scrollIntoView({ behavior: 'smooth' });
     });

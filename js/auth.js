@@ -32,20 +32,9 @@
     element.className = "alert alert-" + type;
   }
 
-  function sendVerificationEmail(user) {
-    var actionSettings = window.location.protocol === "http:" || window.location.protocol === "https:" ? {
-      url: window.location.origin + "/login.html",
-      handleCodeInApp: false
-    } : undefined;
-    return user.sendEmailVerification(actionSettings);
-  }
-
   var registerForm = document.getElementById("register-form");
   if (registerForm) {
     var registerMessage = document.getElementById("register-message");
-    var verificationPanel = document.getElementById("verification-panel");
-    var verificationMessage = document.getElementById("verification-message");
-    var currentUser = null;
 
     registerForm.addEventListener("submit", function(event) {
       event.preventDefault();
@@ -63,40 +52,15 @@
         return;
       }
       firebase.auth().createUserWithEmailAndPassword(email, password).then(function(result) {
-        currentUser = result.user;
-        return currentUser.updateProfile({ displayName: name }).then(function() {
-          return sendVerificationEmail(currentUser);
+        return result.user.updateProfile({ displayName: name }).then(function() {
+          localStorage.setItem(sessionKey, "1");
+          var pending = JSON.parse(localStorage.getItem(pendingCartKey) || "null");
+          var destination = pending && pending.returnUrl ? pending.returnUrl : "index.html";
+          showMessage(registerMessage, "Account created. Redirecting...", "success");
+          window.setTimeout(function() { window.location.href = destination; }, 700);
         });
-      }).then(function() {
-        registerForm.classList.add("d-none");
-        verificationPanel.classList.remove("d-none");
       }).catch(function(error) {
         showMessage(registerMessage, error.code === "auth/email-already-in-use" ? "An account with this Gmail address already exists." : error.message, "danger");
-      });
-    });
-
-    document.getElementById("resend-verification").addEventListener("click", function() {
-      if (!currentUser) return;
-      sendVerificationEmail(currentUser).then(function() {
-        showMessage(verificationMessage, "A new verification email was sent. Check your inbox and spam folder.", "success");
-      }).catch(function(error) {
-        showMessage(verificationMessage, error.code === "auth/too-many-requests" ? "Please wait a few minutes before requesting another email." : error.message, "danger");
-      });
-    });
-
-    document.getElementById("verification-form").addEventListener("submit", function(event) {
-      event.preventDefault();
-      currentUser.reload().then(function() {
-        if (!currentUser.emailVerified) throw new Error("Please click the verification link in your email first.");
-        return currentUser.getIdToken(true);
-      }).then(function() {
-        localStorage.setItem(sessionKey, "1");
-        showMessage(verificationMessage, "Email verified. Redirecting...", "success");
-        var pending = JSON.parse(localStorage.getItem(pendingCartKey) || "null");
-        var destination = pending && pending.returnUrl ? pending.returnUrl : "index.html";
-        window.setTimeout(function() { window.location.href = destination; }, 700);
-      }).catch(function(error) {
-        showMessage(verificationMessage, error.message, "danger");
       });
     });
   }
@@ -112,11 +76,6 @@
         showMessage(message, "Please use a valid Gmail address.", "danger");
       } else {
         firebase.auth().signInWithEmailAndPassword(email, password).then(function(result) {
-          if (!result.user.emailVerified) {
-            return sendVerificationEmail(result.user).then(function() {
-              return firebase.auth().signOut().then(function() { throw new Error("Please verify your email. A new verification email was sent."); });
-            });
-          }
           localStorage.setItem(sessionKey, "1");
           showMessage(message, "You are logged in. Redirecting...", "success");
           window.setTimeout(function() { window.location.href = "index.html"; }, 700);

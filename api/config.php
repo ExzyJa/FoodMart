@@ -1,9 +1,21 @@
 <?php
 declare(strict_types=1);
 
-const PAYMONGO_SECRET_KEY = 'sk_test_replace_this_value';
-const PAYMONGO_WEBHOOK_SECRET = 'replace_this_webhook_secret';
-const SITE_URL = 'https://intern7zsa.com';
+// Load environment variables from .env file (for local development)
+if (file_exists(__DIR__ . '/../.env')) {
+    $lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos($line, '=') !== false && strpos($line, '#') !== 0) {
+            [$key, $value] = explode('=', $line, 2);
+            putenv(trim($key) . '=' . trim($value));
+        }
+    }
+}
+
+// Use environment variables; fall back to defaults
+$PAYMONGO_SECRET_KEY = getenv('PAYMONGO_SECRET_KEY') ?: '';
+$PAYMONGO_WEBHOOK_SECRET = getenv('PAYMONGO_WEBHOOK_SECRET') ?: '';
+$SITE_URL = getenv('SITE_URL') ?: 'https://intern7zsa.com';
 
 function jsonResponse(array $data, int $status = 200): void
 {

@@ -12,12 +12,37 @@ foreach (explode(',', $signature) as $part) {
 }
 $timestamp = $parts['t'] ?? '';
 $provided = $parts['li'] ?? ($parts['te'] ?? '');
-$expected = hash_hmac('sha256', $timestamp . '.' . $payload, PAYMONGO_WEBHOOK_SECRET);
+$expected = hash_hmac('sha256', $timestamp . '.' . $payload, $PAYMONGO_WEBHOOK_SECRET);
 if (!$timestamp || !$provided || !hash_equals($expected, $provided) || abs(time() - (int) $timestamp) > 300) {
     jsonResponse(['message' => 'Invalid webhook signature.'], 401);
 }
 
-// Save the verified event to a database or order service here.
+$event = json_decode($payload, true);
+$type = $event['data']['attributes']['type'] ?? '';
+
+if ($type === 'checkout_session.payment.paid') {
+    $checkoutData = $event['data']['attributes']['data'] ?? [];
+    $sessionId = $checkoutData['id'] ?? '';
+    $paidAmount = $checkoutData['attributes']['line_items'] ?? [];
+    $customerEmail = $checkoutData['attributes']['billing']['email']
+        ?? $checkoutData['attributes']['customer_email']
+        ?? '';
+
+    // Minimal file-based log so you have a record of paid orders.
+    // Replace this with a real database insert/update once you have one.
+    $logLine = sprintf(
+        "[%s] PAID session=%s email=%s\n",
+        date('c'),
+        $sessionId,
+        $customerEmail
+    );
+    file_put_contents(__DIR__ . '/paid-orders.log', $logLine, FILE_APPEND | LOCK_EX);
+
+    // TODO: once you have a database/order table, look up the order by
+    // $sessionId (store it when you create the checkout session) and
+    // mark it as paid here instead of / in addition to the log file.
+}
+
 http_response_code(200);
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode(['received' => true]);

@@ -1,0 +1,30 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "api/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/create-checkout",
+        "function": {
+          "functionId": "createCheckout",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "/api/payment-webhook",
+        "function": {
+          "functionId": "paymentWebhook",
+          "region": "us-central1"
+        }
+      }
+    ]
+  },
+  "functions": {
+    "source": "functions"
+  }
+}

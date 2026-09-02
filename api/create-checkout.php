@@ -34,8 +34,8 @@ $payload = json_encode(['data' => ['attributes' => [
     'payment_method_types' => ['card', 'gcash', 'paymaya'],
     'description' => 'FoodMart order ' . substr((string) ($data['order_number'] ?? 'FoodMart'), 0, 40),
     'send_email_receipt' => true,
-    'success_url' => SITE_URL . '/shop.html?payment=success',
-    'cancel_url' => SITE_URL . '/shop.html?payment=cancelled'
+    'success_url' => $SITE_URL . '/shop.html?payment=success',
+    'cancel_url' => $SITE_URL . '/shop.html?payment=cancelled'
 ]]]]);
 
 $curl = curl_init('https://api.paymongo.com/v1/checkout_sessions');
@@ -43,7 +43,7 @@ curl_setopt_array($curl, [
     CURLOPT_POST => true,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_HTTPHEADER => [
-        'Authorization: Basic ' . base64_encode(PAYMONGO_SECRET_KEY . ':'),
+        'Authorization: Basic ' . base64_encode($PAYMONGO_SECRET_KEY . ':'),
         'Content-Type: application/json',
         'Accept: application/json'
     ],

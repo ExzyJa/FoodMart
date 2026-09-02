@@ -1,0 +1,14 @@
+{
+  "name": "foodmart-functions",
+  "private": true,
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "scripts": {
+    "lint": "echo No lint configured"
+  },
+  "dependencies": {
+    "firebase-functions": "^6.3.2"
+  }
+}

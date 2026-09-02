@@ -1,6 +1,13 @@
 <?php
 declare(strict_types=1);
 require __DIR__ . '/config.php';
+
+// Debug: Check if API keys are loaded
+if (!$PAYMONGO_SECRET_KEY || !$PAYMONGO_WEBHOOK_SECRET) {
+    error_log("ERROR: PayMongo keys not loaded. SECRET_KEY: " . ($PAYMONGO_SECRET_KEY ? "OK" : "MISSING") . ", WEBHOOK_SECRET: " . ($PAYMONGO_WEBHOOK_SECRET ? "OK" : "MISSING"));
+    jsonResponse(['message' => 'Server configuration error. Contact support.'], 500);
+}
+
 requirePost();
 
 $data = requestData();

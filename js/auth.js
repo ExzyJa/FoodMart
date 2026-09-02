@@ -53,11 +53,12 @@
       }
       firebase.auth().createUserWithEmailAndPassword(email, password).then(function(result) {
         return result.user.updateProfile({ displayName: name }).then(function() {
-          localStorage.setItem(sessionKey, "1");
-          var pending = JSON.parse(localStorage.getItem(pendingCartKey) || "null");
-          var destination = pending && pending.returnUrl ? pending.returnUrl : "index.html";
-          showMessage(registerMessage, "Account created. Redirecting...", "success");
-          window.setTimeout(function() { window.location.href = destination; }, 700);
+          // Send verification email
+          return result.user.sendEmailVerification().then(function() {
+            localStorage.setItem(sessionKey, "1");
+            showMessage(registerMessage, "Account created! Check your Gmail for a verification email.", "success");
+            window.setTimeout(function() { window.location.href = "login.html"; }, 2000);
+          });
         });
       }).catch(function(error) {
         showMessage(registerMessage, error.code === "auth/email-already-in-use" ? "An account with this Gmail address already exists." : error.message, "danger");

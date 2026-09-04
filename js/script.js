@@ -128,8 +128,9 @@
   }
 
   var initShopping = function() {
-    var cart = JSON.parse(localStorage.getItem('foodmart-home-cart') || '[]');
+    var cart = JSON.parse(localStorage.getItem('foodmart-cart') || localStorage.getItem('foodmart-home-cart') || '[]');
     var wishlist = JSON.parse(localStorage.getItem('foodmart-wishlist') || '[]');
+    var productIds = ['bananas', 'biscuits', 'cucumber', 'milk', 'tomatoes', 'ketchup'];
     var $cartItems = $('#cart-items');
     var $cartCount = $('#cart-count');
     var $cartTotal = $('#cart-total');
@@ -144,7 +145,7 @@
     cart.forEach(function(item) { item.price = 1; });
 
     var saveCart = function() {
-      localStorage.setItem('foodmart-home-cart', JSON.stringify(cart));
+      localStorage.setItem('foodmart-cart', JSON.stringify(cart));
     };
 
     var renderCart = function() {
@@ -193,8 +194,8 @@
       var $product = $(this);
       if (!$product.find('h3').length || !$product.find('.price').length) return;
 
-      $product.attr('data-product-id', index);
-      var productId = String(index);
+      $product.attr('data-product-id', productIds[index] || String(index));
+      var productId = productIds[index] || String(index);
       var isWishlisted = wishlist.indexOf(productId) !== -1;
       $product.find('.btn-wishlist')
         .toggleClass('active', isWishlisted)
@@ -296,7 +297,8 @@
 
     $('.offcanvas-body .btn-lg[type="submit"]').click(function(e) {
       e.preventDefault();
-      alert(cart.length ? 'Checkout is ready to connect to a payment provider.' : 'Add an item to your cart first.');
+      if (cart.length) window.location.href = 'shop.html';
+      else alert('Add an item to your cart first.');
     });
 
     var pending = window.FoodMartAuth.takePendingCart();

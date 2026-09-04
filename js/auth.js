@@ -2,12 +2,16 @@
   "use strict";
 
   var sessionKey = "foodmart-session";
+  var userNameKey = "foodmart-user-name";
   var pendingCartKey = "foodmart-pending-cart";
   var gmailPattern = /^[^\s@]+@gmail\.com$/i;
 
   window.FoodMartAuth = {
     isLoggedIn: function() {
       return localStorage.getItem(sessionKey) === "1";
+    },
+    getUserName: function() {
+      return localStorage.getItem(userNameKey) || "there";
     },
     requireLoginForCart: function(item, returnUrl) {
       if (this.isLoggedIn()) return true;
@@ -26,6 +30,13 @@
       return pending;
     }
   };
+
+  document.querySelectorAll("[data-user-greeting]").forEach(function(element) {
+    if (window.FoodMartAuth.isLoggedIn()) {
+      element.textContent = "Welcome, " + window.FoodMartAuth.getUserName();
+      element.classList.remove("d-none");
+    }
+  });
 
   function showMessage(element, message, type) {
     element.textContent = message;
@@ -82,6 +93,7 @@
             });
           }
           localStorage.setItem(sessionKey, "1");
+          localStorage.setItem(userNameKey, result.user.displayName || email.split("@")[0]);
           showMessage(message, "You are logged in. Redirecting...", "success");
           window.setTimeout(function() { window.location.href = "index.html"; }, 700);
         }).catch(function(error) {

@@ -55,7 +55,6 @@
         return result.user.updateProfile({ displayName: name }).then(function() {
           // Send verification email
           return result.user.sendEmailVerification().then(function() {
-            localStorage.setItem(sessionKey, "1");
             showMessage(registerMessage, "Account created! Check your Gmail for a verification email.", "success");
             window.setTimeout(function() { window.location.href = "login.html"; }, 2000);
           });
@@ -77,6 +76,11 @@
         showMessage(message, "Please use a valid Gmail address.", "danger");
       } else {
         firebase.auth().signInWithEmailAndPassword(email, password).then(function(result) {
+          if (!result.user.emailVerified) {
+            return firebase.auth().signOut().then(function() {
+              throw new Error("Please verify your email address before logging in.");
+            });
+          }
           localStorage.setItem(sessionKey, "1");
           showMessage(message, "You are logged in. Redirecting...", "success");
           window.setTimeout(function() { window.location.href = "index.html"; }, 700);

@@ -3,6 +3,10 @@ declare(strict_types=1);
 require __DIR__ . '/config.php';
 requirePost();
 
+if (!$PAYMONGO_WEBHOOK_SECRET) {
+    jsonResponse(['message' => 'Webhook is not configured.'], 503);
+}
+
 $payload = file_get_contents('php://input');
 $signature = $_SERVER['HTTP_PAYMONGO_SIGNATURE'] ?? '';
 $parts = [];
@@ -23,16 +27,15 @@ $type = $event['data']['attributes']['type'] ?? '';
 if ($type === 'checkout_session.payment.paid') {
     $checkoutData = $event['data']['attributes']['data'] ?? [];
     $sessionId = $checkoutData['id'] ?? '';
-    $paidAmount = $checkoutData['attributes']['line_items'] ?? [];
-    $customerEmail = $checkoutData['attributes']['billing']['email']
-        ?? $checkoutData['attributes']['customer_email']
-        ?? '';
+    $attributes = $checkoutData['attributes'] ?? [];
+    $customerEmail = $attributes['billing']['email'] ?? $attributes['customer_email'] ?? '';
 
     // Minimal file-based log so you have a record of paid orders.
     // Replace this with a real database insert/update once you have one.
     $logLine = sprintf(
-        "[%s] PAID session=%s email=%s\n",
+        "[%s] event=%s session=%s email=%s\n",
         date('c'),
+        $type,
         $sessionId,
         $customerEmail
     );

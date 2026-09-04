@@ -137,8 +137,11 @@
     var $wishlistItems = $('#wishlist-items');
 
     var money = function(value) {
-      return '$' + value.toFixed(2);
+      return '₱' + value.toFixed(2);
     };
+
+    $('.product-item .price').text('₱1.00');
+    cart.forEach(function(item) { item.price = 1; });
 
     var saveCart = function() {
       localStorage.setItem('foodmart-home-cart', JSON.stringify(cart));

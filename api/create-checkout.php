@@ -2,9 +2,8 @@
 declare(strict_types=1);
 require __DIR__ . '/config.php';
 
-// Debug: Check if API keys are loaded
-if (!$PAYMONGO_SECRET_KEY || !$PAYMONGO_WEBHOOK_SECRET) {
-    error_log("ERROR: PayMongo keys not loaded. SECRET_KEY: " . ($PAYMONGO_SECRET_KEY ? "OK" : "MISSING") . ", WEBHOOK_SECRET: " . ($PAYMONGO_WEBHOOK_SECRET ? "OK" : "MISSING"));
+if (!$PAYMONGO_SECRET_KEY) {
+    error_log('ERROR: PayMongo secret key is not loaded.');
     jsonResponse(['message' => 'Server configuration error. Contact support.'], 500);
 }
 
@@ -58,11 +57,13 @@ curl_setopt_array($curl, [
     CURLOPT_TIMEOUT => 20
 ]);
 $response = curl_exec($curl);
+$curlError = curl_error($curl);
 $status = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
 curl_close($curl);
 $result = json_decode((string) $response, true);
 $checkoutUrl = $result['data']['attributes']['checkout_url'] ?? null;
-if ($status < 200 || $status >= 300 || !$checkoutUrl) {
+if ($curlError || $status < 200 || $status >= 300 || !$checkoutUrl) {
+    error_log('PayMongo checkout error: ' . ($curlError ?: (string) $response));
     jsonResponse(['message' => 'PayMongo could not create the checkout session.'], 502);
 }
 

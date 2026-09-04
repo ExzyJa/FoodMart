@@ -6,12 +6,12 @@ const paymongoSecret = defineSecret("PAYMONGO_SECRET_KEY");
 const paymongoWebhookSecret = defineSecret("PAYMONGO_WEBHOOK_SECRET");
 const siteUrl = "https://foodmart-f4b93.web.app";
 const catalog = {
-  bananas: { name: "Fresh Bananas", amount: 10000 },
-  biscuits: { name: "Butter Biscuits", amount: 10000 },
-  cucumber: { name: "Fresh Cucumber", amount: 10000 },
-  milk: { name: "Pure Fresh Milk", amount: 10000 },
-  tomatoes: { name: "Garden Tomatoes", amount: 10000 },
-  ketchup: { name: "Tomato Ketchup", amount: 10000 }
+  bananas: { name: "Fresh Bananas", amount: 100 },
+  biscuits: { name: "Butter Biscuits", amount: 100 },
+  cucumber: { name: "Fresh Cucumber", amount: 100 },
+  milk: { name: "Pure Fresh Milk", amount: 100 },
+  tomatoes: { name: "Garden Tomatoes", amount: 100 },
+  ketchup: { name: "Tomato Ketchup", amount: 100 }
 };
 
 function jsonResponse(response, data, status = 200) {

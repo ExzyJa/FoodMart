@@ -20,18 +20,21 @@
     localStorage.setItem("foodmart-cart", JSON.stringify(cart));
   };
 
-  var showOrderQr = function(orderNumber, customerName, total, payment) {
+  var showOrderQr = function(orderNumber, customerName, total, payment, qrText) {
     var qrPanel = document.getElementById("order-qr-panel");
     var qrElement = document.getElementById("order-qr");
+    var checkoutLink = document.getElementById("payment-checkout-link");
     qrElement.innerHTML = "";
     qrPanel.classList.remove("d-none");
+    checkoutLink.classList.toggle("d-none", payment !== "PayMongo");
+    if (payment === "PayMongo") checkoutLink.href = qrText;
     if (typeof QRCode === "undefined") {
       qrElement.textContent = "QR code library could not load. Please reconnect and try again.";
       return;
     }
     try {
       new QRCode(qrElement, {
-        text: [orderNumber, customerName, total.replace("₱", ""), payment === "Cash on delivery" ? "COD" : "PAYMONGO"].join("|"),
+        text: qrText || [orderNumber, customerName, total.replace("₱", ""), "COD"].join("|"),
         width: 180,
         height: 180,
         colorDark: "#222222",
@@ -130,12 +133,21 @@
           items: cart.map(function(item) { return { id: item.id, quantity: item.quantity }; })
         })
       }).then(function(response) {
-        return response.json().then(function(data) {
+        return response.text().then(function(body) {
+          var data;
+          try {
+            data = JSON.parse(body);
+          } catch (error) {
+            throw new Error("The payment service is unavailable. Please try again later.");
+          }
           if (!response.ok) throw new Error(data.message || "Could not start payment.");
           return data;
         });
       }).then(function(data) {
-        window.location.href = data.checkout_url;
+        result.className = "alert alert-info mt-4";
+        result.textContent = "Scan the QR code below to pay securely with PayMongo.";
+        showOrderQr(orderNumber, customerName, orderTotal, "PayMongo", data.checkout_url);
+        submitButton.disabled = false;
       }).catch(function(error) {
         result.className = "alert alert-danger mt-4";
         result.textContent = error.message;
@@ -159,6 +171,18 @@
     if (pendingItem) pendingItem.quantity += pending.item.quantity;
     else cart.push(pending.item);
     saveCart();
+  }
+  var paymentStatus = new URLSearchParams(window.location.search).get("payment");
+  if (paymentStatus === "success") {
+    cart = [];
+    saveCart();
+    var successMessage = document.getElementById("order-result");
+    successMessage.className = "alert alert-success mt-4";
+    successMessage.textContent = "Payment received. Your order is being processed.";
+  } else if (paymentStatus === "cancelled") {
+    var cancelledMessage = document.getElementById("order-result");
+    cancelledMessage.className = "alert alert-warning mt-4";
+    cancelledMessage.textContent = "Payment was cancelled. Your cart is still saved.";
   }
   renderProducts();
   var searchQuery = new URLSearchParams(window.location.search).get("search") || "";
